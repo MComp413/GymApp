@@ -1,13 +1,22 @@
-import { ComponentType } from "react"
+import React from 'react';
 import { Button, View, Text } from "react-native";
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import TrainingListScreen from "./TrainingListScreen";
+import StatsScreen from "./StatsScreen";
+import ExecuteTrainingScreen from "./ExecuteTrainingScreen";
 
-const HomeScreen = (props: { navigation: any }) =>
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Text> Home </Text>
-        <Button
-            title="Go to Details"
-            onPress={() => props.navigation.navigate("Details")}
-        />
-    </View>
+const Tabs = createMaterialTopTabNavigator();
 
-export default HomeScreen
+const HomeScreen = ({route, navigation}: any) => {
+  return(
+    <Tabs.Navigator>
+        <Tabs.Screen name="LIST" component={TrainingListScreen}/>
+        <Tabs.Screen name="STATS" component={StatsScreen}/>
+        <Tabs.Screen name="EXECUTE" component={ExecuteTrainingScreen}/>
+    </Tabs.Navigator>  
+  );
+}
+
+
+
+export default HomeScreen;
