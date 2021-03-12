@@ -1,8 +1,8 @@
 import React from "react";
 import { Button, View, Text } from "react-native";
-import { Training } from "../../constants/types";
+import { Exercise } from "../../constants/types";
 
-const TrainingData = (props: {expanded?: boolean} & Training) => {
+const ExerciseHeader = (props: {expanded?: boolean} & Exercise) => {
   const {name, details, expanded} = props;
   return(
     <>
@@ -14,4 +14,4 @@ const TrainingData = (props: {expanded?: boolean} & Training) => {
   )
 }
 
-export default TrainingData;
+export default ExerciseHeader;
