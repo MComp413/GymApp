@@ -1,12 +1,81 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, View, Text } from "react-native";
+import { useDispatch, useSelector } from 'react-redux';
+import { Exercise } from '../../constants/types';
+import { actionBuilders } from '../../reducer/actions';
+import { IState } from '../../reducer/state';
+import TrainingHeader from '../atom/TrainingHeader';
+import { ExecutionFooter } from '../org/ExecutionFooter';
+import ExerciseExecutionCard from '../org/ExerciseExecutionCard';
+
+const initialExerciseExecutionList: {exercise: Exercise, checked: boolean}[] = []
 
 const ExecuteTrainingScreen = ({route, navigation}: any) => {
-  return(
-    <View>
-      <Text> TODO: Execute </Text>
-    </View>
+  const dispatch = useDispatch();
+  const {executionTrainingId, executionExerciseList} = useSelector((state: IState) => state.execution);
+  const {training, exerciseList} = useSelector((state: IState) => executionTrainingId !== null ?
+    {
+      training: state.global.trainingList.find((training) => training.id === executionTrainingId)!,
+      exerciseList: state.global.exerciseList.filter((exercise) => exercise.trainingId === executionTrainingId)
+    } : {training: null, exerciseList: [] as Exercise[]}
   );
+
+  useEffect(() => {
+    if(executionTrainingId !== null && executionTrainingId !== undefined){
+      dispatch(actionBuilders.execution.SET_EXERCISE_EXECUTION_LIST(
+        {executionList: exerciseList.map((exercise) => {
+          return {
+            exerciseId: exercise.id,
+            done: false
+          }
+        })}
+      ));
+    }
+  },
+  [executionTrainingId]);
+
+  if(executionTrainingId !== null && executionTrainingId !== undefined){
+    const {name, details} = training!;
+    return(
+      <View>
+        <TrainingHeader
+          id={executionTrainingId}
+          name={name}
+          details={details}
+        />
+        <View>
+          {exerciseList!.map((exercise, index) => {
+            const execution = executionExerciseList.find((execution) => execution.exerciseId === exercise.id);
+            const done = execution ? execution.done : false;
+            return(
+              <View key={index}>
+                <ExerciseExecutionCard
+                  exercise={exercise}
+                  checked={done}
+                  onToggle={() => {
+                    if(done){
+                      dispatch(actionBuilders.execution.MARK_EXERCISE_NOT_DONE({exerciseId: exercise.id}));
+                    } else {
+                      dispatch(actionBuilders.execution.MARK_EXERCISE_DONE({exerciseId: exercise.id}));
+                    }
+                  }}
+                />
+              </View>
+            );
+          })}
+        </View>
+        <ExecutionFooter
+          navigation={navigation}
+        />
+      </View>
+    )
+  } else {
+    return(
+      <View>
+        <Text> Selecione um treino para começar </Text>
+      </View>
+    )
+  };
 }
 
 export default ExecuteTrainingScreen;

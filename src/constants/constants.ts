@@ -36,3 +36,5 @@ export const tableValues = Object.freeze({
   TRAINING: `(name TEXT NOT NULL, details TEXT)`,
   EXERCISES: `(name TEXT NOT NULL, details TEXT, training INTEGER)`
 })
+
+export const NO_ID = -1;

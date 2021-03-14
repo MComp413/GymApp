@@ -1,12 +1,12 @@
 export type Exercise = {
-    id?: number,
+    id: number,
     name: string,
     details: string,
     trainingId: number
 }
 
 export type Training = {
-    id?: number
+    id: number
     name: string,
     details: string
 }

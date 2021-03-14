@@ -1,28 +1,36 @@
 import { Exercise, Training } from "../constants/types";
 
-export interface State {
-  global: {
-    trainingList: Training[],
-    exerciseList: Exercise[]
-  },
-  execution: {
-    executionTrainingId: number | null,
-    executionExerciseList: {exerciseId: number, done: boolean}[]
-  },
-  editTraining: {
-    editingTrainingId: number | null,
-    name: string,
-    details: string,
-    exercises: Exercise[]
-  },
-  newTraining:{
-    name: string,
-    details: string,
-    exercises: Exercise[]
-  }
+export interface IGlobalState {
+  trainingList: Training[],
+  exerciseList: Exercise[]
 }
 
-export const initialState: State = Object.freeze({
+export interface IExecutionState {
+  executionTrainingId: number | null,
+  executionExerciseList: {exerciseId: number, done: boolean}[]
+}
+
+export interface IEditState {
+  editingTrainingId: number | null,
+  name: string,
+  details: string,
+  exercises: Exercise[]
+}
+
+export interface INewState {
+  name: string,
+  details: string,
+  exercises: Exercise[]
+}
+
+export interface IState {
+  global: IGlobalState,
+  execution: IExecutionState,
+  editTraining: IEditState,
+  newTraining: INewState
+}
+
+export const initialState: IState = Object.freeze({
   global: Object.freeze({
     trainingList: [],
     exerciseList: []

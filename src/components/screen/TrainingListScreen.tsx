@@ -1,28 +1,46 @@
-import React from 'react';
-import { Button, View, Text, StyleSheet } from "react-native";
+import React, { useEffect } from 'react';
+import { Button, View, StyleSheet} from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import { StackNavRoutes, StackNavTitles } from '../../constants/constants';
-
-import { mock } from '../../../res/mockdata';
+import { actionBuilders } from '../../reducer/actions';
 import TrainingCard from '../org/TrainingCard';
+import { IState } from '../../reducer/state';
+import { mock } from '../../../res/mockdata';
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     flexDirection: "column",
-    justifyContent: "flex-start",
-    alignItems: "stretch"
+    justifyContent: "space-around",
+    alignItems: "stretch",
   }
 });
 
 const TrainingListScreen = ({route, navigation}: any) => {
-  const trainingId = mock.trainingList[0].id ? mock.trainingList[0].id : 0;
+  const {trainingList, exerciseList} = useSelector((state: IState) => state.global);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if(trainingList.length === 0){
+      dispatch(actionBuilders.global.SET_TRAINING_LIST({trainings: mock.trainingList}));
+    }
+    if(exerciseList.length === 0){
+      dispatch(actionBuilders.global.SET_EXERCISE_LIST({exercises: mock.exerciseList}));
+    }
+  },
+  [trainingList, exerciseList]);
+
   return(
     <View style={styles.screen}>
-        <View>
-          <TrainingCard
-            id={trainingId}
-          />
-        </View>
+        {trainingList.map((training, index) =>
+          <View key={index}>
+            <TrainingCard
+              training={training}
+              navigation={navigation}
+            />
+          </View>
+        )}
+        
         <Button
             title={StackNavTitles[StackNavRoutes.NEW]}
             onPress={() => navigation.navigate(StackNavRoutes.NEW)}

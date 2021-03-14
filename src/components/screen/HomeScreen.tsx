@@ -1,14 +1,14 @@
 import React from 'react';
-import { Button, View, Text } from "react-native";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import TrainingListScreen from "./TrainingListScreen";
-import StatsScreen from "./StatsScreen";
-import ExecuteTrainingScreen from "./ExecuteTrainingScreen";
+import TrainingListScreen from './TrainingListScreen';
+import StatsScreen from './StatsScreen';
+import ExecuteTrainingScreen from './ExecuteTrainingScreen';
 import { TabNavRoutes, TabNavTitles } from '../../constants/constants';
 
 const Tabs = createMaterialTopTabNavigator();
 
 const HomeScreen = ({route, navigation}: any) => {
+
   return(
     <Tabs.Navigator>
       <Tabs.Screen
@@ -29,7 +29,5 @@ const HomeScreen = ({route, navigation}: any) => {
     </Tabs.Navigator>  
   );
 }
-
-
 
 export default HomeScreen;

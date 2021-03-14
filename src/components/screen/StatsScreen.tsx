@@ -4,7 +4,7 @@ import { Button, View, Text } from "react-native";
 const StatsScreen = ({route, navigation}: any) => {
   return(
     <View>
-      <Text> TODO: Stats </Text>
+      <Text> Nossos desenvolvedores estão trabalhando para incrementar o app </Text>
     </View>
   );
 }

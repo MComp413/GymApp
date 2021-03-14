@@ -21,7 +21,7 @@ const TrainingData = (props: Training & {exerciseList: Exercise[]}) => {
             name={exercise.name}
             details={exercise.details}
             expanded={false}
-            trainingId={id ? id : 0}
+            trainingId={id}
           />
         </View>
       )}
