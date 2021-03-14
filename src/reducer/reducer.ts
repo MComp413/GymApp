@@ -14,6 +14,7 @@ function globalReducer(oldState: IGlobalState, action: IAction): IGlobalState {
       newState.exerciseList = action.payload.exercises;
       break;
   }
+  console.log(JSON.stringify(newState));
   return newState;
 }
 

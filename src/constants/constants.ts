@@ -33,8 +33,8 @@ export const tableSchemas = Object.freeze({
 })
 
 export const tableValues = Object.freeze({
-  TRAINING: `(name TEXT NOT NULL, details TEXT)`,
-  EXERCISES: `(name TEXT NOT NULL, details TEXT, training INTEGER)`
+  TRAINING: `(name, details)`,
+  EXERCISES: `(name, details, training)`
 })
 
 export const NO_ID = -1;

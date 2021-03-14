@@ -6,6 +6,9 @@ import { actionBuilders } from '../../reducer/actions';
 import TrainingCard from '../org/TrainingCard';
 import { IState } from '../../reducer/state';
 import { mock } from '../../../res/mockdata';
+import { exerciseCrud, trainingCrud } from '../../database/transactions';
+import { range } from 'ramda';
+import { Exercise, Training } from '../../constants/types';
 
 const styles = StyleSheet.create({
   screen: {
@@ -22,10 +25,17 @@ const TrainingListScreen = ({route, navigation}: any) => {
 
   useEffect(() => {
     if(trainingList.length === 0){
-      dispatch(actionBuilders.global.SET_TRAINING_LIST({trainings: mock.trainingList}));
+      trainingCrud.read.all((rows) => {
+        const trainings: Training[] = range(0, rows.length).map((itemIndex) => rows.item(itemIndex));
+        dispatch(actionBuilders.global.SET_TRAINING_LIST({trainings}));
+      });
     }
+
     if(exerciseList.length === 0){
-      dispatch(actionBuilders.global.SET_EXERCISE_LIST({exercises: mock.exerciseList}));
+      exerciseCrud.read.all((rows) => {
+        const exercises: Exercise[] = range(0, rows.length).map((itemIndex) => rows.item(itemIndex));
+        dispatch(actionBuilders.global.SET_EXERCISE_LIST({exercises}));
+      });
     }
   },
   [trainingList, exerciseList]);

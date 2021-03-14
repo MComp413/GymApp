@@ -1,3 +1,5 @@
+import { ResultSetRowList } from "react-native-sqlite-storage"
+
 export type Exercise = {
     id: number,
     name: string,
@@ -10,3 +12,5 @@ export type Training = {
     name: string,
     details: string
 }
+
+export type transactionCallback = (rows: ResultSetRowList) => void

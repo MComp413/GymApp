@@ -1,116 +1,192 @@
-import { openDatabase } from 'react-native-sqlite-storage';
-import { Exercise, Training } from '../constants/types';
+import { openDatabase, ResultSetRowList, SQLError } from 'react-native-sqlite-storage';
+import { Exercise, Training, transactionCallback } from '../constants/types';
 import { tableNames, tableSchemas, tableValues } from '../constants/constants';
+import { mock } from '../../res/mockdata';
 
 
 const db = openDatabase(
-  { name: "gym.db", location: "default" },
+  { name: "gymapp2.db", location: "default" },
   () => {
     initTable();
-    console.log("deu bom");
   },
-  () => console.log("deu ruim")
+  () => console.log("DB connection failure!")
 )
 
 function initTable(){
+  console.log("Initializing Tables")
   db.transaction((tx) => {
     tx.executeSql(
-      `CREATE TABLE IF NOT EXISTS TABLE ${tableSchemas.TRAINING};
-       CREATE TABLE IF NOT EXISTS TABLE ${tableSchemas.EXERCISES};`
-    )
-  })  
+      `CREATE TABLE IF NOT EXISTS ${tableSchemas.TRAINING};`,
+      [],
+      (tx, result) => console.log(`DB ${tableNames.TRAINING} initialization success!`),
+      (tx, err) => console.log(`DB ${tableNames.TRAINING} initialization error: ${err}!`)
+    );
+    tx.executeSql(
+      `CREATE TABLE IF NOT EXISTS ${tableSchemas.EXERCISES};`,
+      [],
+      (tx, result) => console.log(`DB ${tableNames.EXERCISES} initialization success!`),
+      (tx, err) => console.log(`DB ${tableNames.EXERCISES} initialization error: ${err}!`)
+    );
+    console.log("DB connection success!");
+  });
+  writeMockData();
+}
+
+function writeMockData(){
+  console.log("Writing mocked data to DB;");
+  for(const trainingMock of mock.trainingList){
+    console.log(`Creating: ${JSON.stringify(trainingMock)}`);
+    trainingCrud.create(trainingMock);
+  }
+  for(const exerciseMock of mock.exerciseList){
+    exerciseCrud.create(exerciseMock);
+  }
+}
+
+function flushDatabase(){
+  console.log("Deleting all rows from all tables;");
+  db.transaction((tx) => tx.executeSql(
+    `DELETE FROM ${tableNames.TRAINING};
+     DELETE FROM ${tableNames.EXERCISES};`,
+    [],
+    (tx, result) => console.log("Deleted everything successfully;"),
+    (tx, err) => console.error("Error deleting everything;")
+  ));
+}
+
+const logTxError = {
+  create: (err: SQLError, tableName: string, data: any) => {
+    console.error(`Error writing to ${tableName}: ${JSON.stringify(data)}`);
+    console.error(`Error: ${JSON.stringify(err)}`)
+  },
+  read: (err: SQLError, tableName: string) => {
+    console.error(`Error reading from table ${tableName}`);
+    console.error(`Error: ${JSON.stringify(err)}`)
+  },
+  update: (err: SQLError, tableName: string, data: any) => {
+    console.error(`Error updating ${tableName}: ${JSON.stringify(data)}`);
+    console.error(`Error: ${JSON.stringify(err)}`)
+  },
+  delete: (err: SQLError, tableName: string, data: any) => {
+    console.error(`Error deleting from table ${tableName}: ${JSON.stringify(data)}`);
+    console.error(`Error: ${JSON.stringify(err)}`)
+  }
 }
 
 export const trainingCrud = Object.freeze({
-  create: (data: Training, cb: any = undefined) => db.transaction((tx) => {
+  create: (data: Training, cb?: transactionCallback) => db.transaction((tx) => {
       tx.executeSql(
         `INSERT INTO ${tableNames.TRAINING} ${tableValues.TRAINING} VALUES (?, ?);`,
         [data.name, data.details],
-        (tx, result) => cb && cb(result.rows)
+        (tx, result) => cb && cb(result.rows),
+        (tx, err) => logTxError.create(err, tableNames.TRAINING, data)
       )
     }),
   read: Object.freeze({
-    all: (cb: any) => db.transaction((tx) => {
+    all: (cb: transactionCallback) => {
+      return db.transaction((tx) => {
         tx.executeSql(
           `SELECT * FROM ${tableNames.TRAINING};`,
           [],
-          (tx, results) => cb(results.rows)
+          (tx, results) => cb(results.rows),
+          (tx, err) => logTxError.read(err, tableNames.TRAINING)
         )
-      }),
-    byId: (id: number, cb: any) => db.transaction((tx) => {
+      })
+    },
+    byId: (id: number, cb: transactionCallback) => db.transaction((tx) => {
         tx.executeSql(
           `SELECT * FROM ${tableNames.TRAINING} WHERE id=?;`,
           [id],
-          (tx, results) => cb(results.rows)
+          (tx, results) => cb(results.rows),
+          (tx, err) => logTxError.read(err, tableNames.TRAINING)
         )
       })
   }),
-  update: (data: {id: number, name?: string, details?: string}, cb: any = undefined) => db.transaction((tx) => {
+  update: (data: {id: number, name?: string, details?: string}, cb?: transactionCallback) => db.transaction((tx) => {
     const {id, name, details} = data;
     const values = [name, details].filter((item) => item !== undefined);
     const valuesString = values.map((item, index) => `${item} = ?`).join(", ");
     tx.executeSql(
       `UPDATE ${tableNames.TRAINING} SET ${valuesString} WHERE id=?`,
       [...values, id],
-      (tx, results) => cb && cb(results.rows)
+      (tx, results) => cb && cb(results.rows),
+      (tx, err) => logTxError.update(err, tableNames.TRAINING, data)
     )
   }),
-  delete: (id: number, cb: any = undefined) => db.transaction((tx) => {
+  delete: (id: number, cb?: transactionCallback) => db.transaction((tx) => {
     tx.executeSql(
       `DELETE FROM TABLE ${tableNames.TRAINING} WHERE id=?`,
       [id],
-      (tx, results) => cb && cb(results.rows)
+      (tx, results) => cb && cb(results.rows),
+      (tx, err) => logTxError.delete(err, tableNames.TRAINING, id)
     )
   })
 })
 
 export const exerciseCrud = Object.freeze({
-  create: (data: Exercise, cb: any = undefined) => db.transaction((tx) => {
+  create: (data: Exercise, cb?: transactionCallback) => db.transaction((tx) => {
+    console.log(data)
     tx.executeSql(
       `INSERT INTO ${tableNames.EXERCISES} ${tableValues.EXERCISES} VALUES (?, ?, ?);`,
       [data.name, data.details, data.trainingId],
-      (tx, result) => cb && cb(result.rows)
+      (tx, result) => cb && cb(result.rows),
+      (tx, err) => logTxError.create(err, tableNames.EXERCISES, data)
     )
   }),
   read: Object.freeze({
-    all: (cb: any) => db.transaction((tx) => {
+    all: (cb: transactionCallback) => db.transaction((tx) => {
         tx.executeSql(
           `SELECT * FROM ${tableNames.EXERCISES};`,
           [],
-          (tx, results) => cb(results.rows)
+          (tx, results) => cb(results.rows),
+          (tx, err) => logTxError.read(err, tableNames.EXERCISES)
         )
       }),
-    byId: (id: number, cb: any) => db.transaction((tx) => {
+    byId: (id: number, cb: transactionCallback) => db.transaction((tx) => {
         tx.executeSql(
           `SELECT * FROM ${tableNames.EXERCISES} WHERE id=?;`,
           [id],
-          (tx, results) => cb(results.rows)
+          (tx, results) => cb(results.rows),
+          (tx, err) => logTxError.read(err, tableNames.EXERCISES)
         )
       }),
-    byTrainingId: (id: number, cb: any) => db.transaction((tx) => {
+    byTrainingId: (id: number, cb: transactionCallback) => db.transaction((tx) => {
         tx.executeSql(
           `SELECT * FROM ${tableNames.EXERCISES} WHERE training=?;`,
           [id],
-          (tx, results) => cb(results.rows)
+          (tx, results) => cb(results.rows),
+          (tx, err) => logTxError.read(err, tableNames.EXERCISES)
         )
       })
   }),
-  update: (data: {id: number, name?: string, details?: string}, cb: any = undefined) => db.transaction((tx) => {
+  update: (data: {id: number, name?: string, details?: string}, cb?: transactionCallback) => db.transaction((tx) => {
     const {id, name, details} = data;
     const values = [name, details].filter((item) => item !== undefined);
     const valuesString = values.map((item, index) => `${item} = ?`).join(", ");
     tx.executeSql(
       `UPDATE ${tableNames.EXERCISES} SET ${valuesString} WHERE id=?`,
       [...values, id],
-      (tx, results) => cb && cb(results.rows)
+      (tx, results) => cb && cb(results.rows),
+      (tx, err) => logTxError.update(err, tableNames.EXERCISES, data)
     )
   }),
-  delete: (id: number, cb: any = undefined) => db.transaction((tx) => {
-    tx.executeSql(
-      `DELETE FROM TABLE ${tableNames.EXERCISES} WHERE id=?`,
-      [id],
-      (tx, results) => cb && cb(results.rows)
-    )
+  delete: Object.freeze({
+    byId: (id: number, cb?: transactionCallback) => db.transaction((tx) => {
+      tx.executeSql(
+        `DELETE FROM TABLE ${tableNames.EXERCISES} WHERE id=?`,
+        [id],
+        (tx, results) => cb && cb(results.rows),
+        (tx, err) => logTxError.delete(err, tableNames.EXERCISES, {byId: id})
+      )
+    }),
+    byTrainingId: (trainingId: number, cb?: transactionCallback) => db.transaction((tx) => {
+      tx.executeSql(
+        `DELETE FROM TABLE ${tableNames.EXERCISES} WHERE training=?`,
+        [trainingId],
+        (tx, results) => cb && cb(results.rows),
+        (tx, err) => logTxError.delete(err, tableNames.EXERCISES, {byTrainingId: trainingId})
+      )
+    })
   })
 });
 
