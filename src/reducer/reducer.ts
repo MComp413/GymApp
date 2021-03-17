@@ -14,7 +14,6 @@ function globalReducer(oldState: IGlobalState, action: IAction): IGlobalState {
       newState.exerciseList = action.payload.exercises;
       break;
   }
-  console.log(JSON.stringify(newState));
   return newState;
 }
 
@@ -63,7 +62,7 @@ function newReducer(oldState: INewState, action: IAction): INewState {
           exercise
       );
       break;
-    case actionTypes.newTraining.SET_EXERCISE_NAME:
+    case actionTypes.newTraining.SET_EXERCISE_DETAILS:
       newState.exercises = newState.exercises.map(
         (exercise) => exercise.id! === action.payload.exerciseTempId ?
           { ...exercise, details: action.payload.details } :
@@ -72,11 +71,11 @@ function newReducer(oldState: INewState, action: IAction): INewState {
       break;
     case actionTypes.newTraining.CREATE_EXERCISE:
       const exerciseListLength = newState.exercises.length;
-      const maxTmpId = exerciseListLength > 1 ? newState.exercises[exerciseListLength-1].id! : 1;
+      const maxTmpId = exerciseListLength > 0 ? newState.exercises[exerciseListLength-1].id! : 0;
       newState.exercises = [...newState.exercises, {id: maxTmpId+1, name: "", details: "", trainingId: NO_ID}];
       break;
     case actionTypes.newTraining.DELETE_EXERCISE:
-      newState.exercises = newState.exercises.filter((exercise) => exercise.id !== action.payload.execiseTempId);
+      newState.exercises = newState.exercises.filter((exercise) => exercise.id !== action.payload.exerciseTempId);
       break;
     case actionTypes.newTraining.FLUSH_FORM:
       return clone(initialState.newTraining);
@@ -100,7 +99,7 @@ function editReducer(oldState: IEditState, action: IAction): IEditState {
           exercise
       );
       break;
-    case actionTypes.editTraining.SET_EXERCISE_NAME:
+    case actionTypes.editTraining.SET_EXERCISE_DETAILS:
       newState.exercises = newState.exercises.map(
         (exercise) => exercise.id! === action.payload.exerciseId ?
           { ...exercise, details: action.payload.details } :
@@ -109,11 +108,11 @@ function editReducer(oldState: IEditState, action: IAction): IEditState {
       break;
     case actionTypes.editTraining.CREATE_EXERCISE:
       const exerciseListLength = newState.exercises.length;
-      const maxTmpId = exerciseListLength > 1 ? newState.exercises[exerciseListLength-1].id! : 1;
+      const maxTmpId = exerciseListLength > 0 ? newState.exercises[exerciseListLength-1].id! : 1;
       newState.exercises = [...newState.exercises, {id: maxTmpId+1, name: "", details: "", trainingId: action.payload.trainingId}];
       break;
     case actionTypes.editTraining.DELETE_EXERCISE:
-      newState.exercises = newState.exercises.filter((exercise) => exercise.id !== action.payload.execiseTempId);
+      newState.exercises = newState.exercises.filter((exercise) => exercise.id !== action.payload.exerciseTempId);
       break;
     case actionTypes.editTraining.FLUSH_FORM:
       return clone(initialState.editTraining);

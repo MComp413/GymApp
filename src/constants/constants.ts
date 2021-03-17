@@ -29,12 +29,12 @@ export const tableNames = Object.freeze({
 
 export const tableSchemas = Object.freeze({
   TRAINING: `${tableNames.TRAINING} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, details TEXT)`,
-  EXERCISES: `${tableNames.EXERCISES} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, details TEXT, training INTEGER, FOREIGN KEY(training) REFERENCES ${tableNames.TRAINING}(id))`
+  EXERCISES: `${tableNames.EXERCISES} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, details TEXT, trainingId INTEGER, FOREIGN KEY(trainingId) REFERENCES ${tableNames.TRAINING}(id))`
 })
 
 export const tableValues = Object.freeze({
   TRAINING: `(name, details)`,
-  EXERCISES: `(name, details, training)`
+  EXERCISES: `(name, details, trainingId)`
 })
 
 export const NO_ID = -1;

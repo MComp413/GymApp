@@ -1,14 +1,10 @@
 import React, { useEffect } from 'react';
-import { Button, View, StyleSheet} from 'react-native';
+import { Button, View, StyleSheet, FlatList} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { StackNavRoutes, StackNavTitles } from '../../constants/constants';
-import { actionBuilders } from '../../reducer/actions';
 import TrainingCard from '../org/TrainingCard';
 import { IState } from '../../reducer/state';
-import { mock } from '../../../res/mockdata';
-import { exerciseCrud, trainingCrud } from '../../database/transactions';
-import { range } from 'ramda';
-import { Exercise, Training } from '../../constants/types';
+import { updateGlobalExerciseList, updateGlobalTrainingList } from '../../utils/utils';
 
 const styles = StyleSheet.create({
   screen: {
@@ -24,37 +20,32 @@ const TrainingListScreen = ({route, navigation}: any) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if(trainingList.length === 0){
-      trainingCrud.read.all((rows) => {
-        const trainings: Training[] = range(0, rows.length).map((itemIndex) => rows.item(itemIndex));
-        dispatch(actionBuilders.global.SET_TRAINING_LIST({trainings}));
-      });
-    }
+    if(trainingList.length === 0)
+      updateGlobalTrainingList(dispatch);
 
-    if(exerciseList.length === 0){
-      exerciseCrud.read.all((rows) => {
-        const exercises: Exercise[] = range(0, rows.length).map((itemIndex) => rows.item(itemIndex));
-        dispatch(actionBuilders.global.SET_EXERCISE_LIST({exercises}));
-      });
-    }
+    if(exerciseList.length === 0)
+      updateGlobalExerciseList(dispatch);
   },
   [trainingList, exerciseList]);
 
   return(
     <View style={styles.screen}>
-        {trainingList.map((training, index) =>
-          <View key={index}>
+      <FlatList
+        data={trainingList}
+        renderItem={(info) => 
+          <View key={info.index}>
             <TrainingCard
-              training={training}
+              training={info.item}
               navigation={navigation}
             />
           </View>
-        )}
-        
-        <Button
-            title={StackNavTitles[StackNavRoutes.NEW]}
-            onPress={() => navigation.navigate(StackNavRoutes.NEW)}
-        />
+        }
+      />
+      
+      <Button
+          title={StackNavTitles[StackNavRoutes.NEW]}
+          onPress={() => navigation.navigate(StackNavRoutes.NEW)}
+      />
     </View>
   );
 }

@@ -13,23 +13,27 @@ const initialExerciseExecutionList: {exercise: Exercise, checked: boolean}[] = [
 const ExecuteTrainingScreen = ({route, navigation}: any) => {
   const dispatch = useDispatch();
   const {executionTrainingId, executionExerciseList} = useSelector((state: IState) => state.execution);
-  const {training, exerciseList} = useSelector((state: IState) => executionTrainingId !== null ?
-    {
-      training: state.global.trainingList.find((training) => training.id === executionTrainingId)!,
-      exerciseList: state.global.exerciseList.filter((exercise) => exercise.trainingId === executionTrainingId)
-    } : {training: null, exerciseList: [] as Exercise[]}
-  );
+  
+  const {training, exerciseList} = useSelector((state: IState) => {
+    return {
+      training: executionTrainingId !== null ? state.global.trainingList.find((training) => training.id === executionTrainingId) : null,
+      exerciseList: executionTrainingId !== null ? state.global.exerciseList.filter((exercise) => exercise.trainingId === executionTrainingId) : [] as Exercise[]
+    }
+  });
 
   useEffect(() => {
     if(executionTrainingId !== null && executionTrainingId !== undefined){
-      dispatch(actionBuilders.execution.SET_EXERCISE_EXECUTION_LIST(
-        {executionList: exerciseList.map((exercise) => {
+      if(training === null){
+        dispatch(actionBuilders.execution.FINISH_TRAINING());
+      } else {
+        const executionList = exerciseList.map((exercise) => {
           return {
             exerciseId: exercise.id,
             done: false
           }
-        })}
-      ));
+        });
+        dispatch(actionBuilders.execution.SET_EXERCISE_EXECUTION_LIST({executionList}));
+      }
     }
   },
   [executionTrainingId]);
