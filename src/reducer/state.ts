@@ -1,4 +1,4 @@
-import { Exercise, Training } from "../constants/types";
+import { Exercise, ExerciseEdition, Training } from "../constants/types";
 
 export interface IGlobalState {
   trainingList: Training[] | null,
@@ -14,7 +14,7 @@ export interface IEditState {
   editingTrainingId: number | null,
   name: string,
   details: string,
-  exercises: Exercise[]
+  exercises: ExerciseEdition[]
 }
 
 export interface INewState {

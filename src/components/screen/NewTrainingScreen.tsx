@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Button, View, Text, TextInput, StyleSheet } from "react-native";
+import { Button, View, Text, TextInput, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { NO_ID, StackNavRoutes } from '../../constants/constants';
 import { trainingCrud } from '../../database/transactions';
 import { actionBuilders } from '../../reducer/actions';
 import { IState } from '../../reducer/state';
 import { updateGlobalExerciseList, updateGlobalTrainingList } from '../../utils/utils';
+import ExerciseListForm from '../org/ExerciseListForm';
 
 const style = StyleSheet.create({
   textInput: {
@@ -33,31 +34,13 @@ const NewTrainingScreen = ({route, navigation}: any) => {
         value={details}
       />
 
-      <Text> TODO: lista de exercícios </Text>
-
-      {exercises.map((exercise, index) => 
-        <View key={index}>
-          <Text> Nome do exercício </Text>
-          <TextInput
-            style={style.textInput}
-            onChangeText={(text) => dispatch(actionBuilders.newTraining.SET_EXERCISE_NAME({exerciseTempId: exercise.id, name: text}))}
-            value={exercise.name}
-          />
-
-          <Text> Detalhes do exercício </Text>
-          <TextInput
-            style={style.textInput}
-            onChangeText={(text) => dispatch(actionBuilders.newTraining.SET_EXERCISE_DETAILS({exerciseTempId: exercise.id, details: text}))}
-            value={exercise.details}
-          />
-
-          <Button
-            title="Deletar exercicio"
-            onPress={() => dispatch(actionBuilders.newTraining.DELETE_EXERCISE({exerciseTempId: exercise.id}))}
-          />
-        </View>
-      )}
-
+      <ExerciseListForm
+        exercises={exercises}
+        onChangeNameCurry={(exerciseId) => (text) => dispatch(actionBuilders.newTraining.SET_EXERCISE_NAME({exerciseTempId: exerciseId, name: text}))}
+        onChangeDetailCurry={(exerciseId) => (text) => dispatch(actionBuilders.newTraining.SET_EXERCISE_DETAILS({exerciseTempId: exerciseId, details: text}))}
+        onDeleteCurry={(exerciseId) => () => dispatch(actionBuilders.newTraining.DELETE_EXERCISE({exerciseTempId: exerciseId}))}
+      />
+      
       <Button
         title="Adicionar exercício"
         onPress={() => dispatch(actionBuilders.newTraining.CREATE_EXERCISE())}

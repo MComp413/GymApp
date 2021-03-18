@@ -1,5 +1,5 @@
 import { openDatabase, ResultSetRowList, SQLError, Transaction } from 'react-native-sqlite-storage';
-import { Exercise, Training, transactionCallback } from '../constants/types';
+import { Exercise, ExerciseEdition, Training, transactionCallback } from '../constants/types';
 import { tableNames, tableSchemas, tableValues } from '../constants/constants';
 import { mock } from '../../res/mockdata';
 import { flatten } from 'ramda';
@@ -76,7 +76,6 @@ export const trainingCrud = Object.freeze({
   createWithExercises: (training: Training, exerciseList: Exercise[], cb?: transactionCallback) => {
     const writeExercisesCallback: transactionCallback = (result, tx) => {
       const trainingId = result.insertId;
-      console.log(trainingId);
       const SQLStatement = `INSERT INTO ${tableNames.EXERCISES} ${tableValues.EXERCISES} VALUES ${exerciseList.map(() => `(?, ?, ?)`).join(", ")};`;
       const vals: (number | string)[] = [];
       exerciseList.forEach((exercise) => {
@@ -117,12 +116,71 @@ export const trainingCrud = Object.freeze({
   update: (data: {id: number, name?: string, details?: string}, cb?: transactionCallback) => db.transaction((tx) => {
     const {id, name, details} = data;
     const values = [name, details].filter((item) => item !== undefined);
-    const valuesString = values.map((item, index) => `${item} = ?`).join(", ");
+    const valuesString = [`name=?`, `details=?`].join(", ");
+    const SQLStatement = `UPDATE ${tableNames.TRAINING} SET ${valuesString} WHERE id=?;`;
     return tx.executeSql(
-      `UPDATE ${tableNames.TRAINING} SET ${valuesString} WHERE id=?`,
+      SQLStatement,
       [...values, id],
       (tx, results) => cb && cb(results, tx),
       (tx, err) => logTxError.update(err, tableNames.TRAINING, data)
+    )
+  }),
+  updateWithExercises: (training: Training, exerciseList: ExerciseEdition[], cb?: transactionCallback) => db.transaction((tx) => {
+    const {id, name, details} = training;
+    const exerciseCreates = exerciseList.filter((exercise) => exercise.status === "created");
+    const exerciseUpdates = exerciseList.filter((exercise) => exercise.status === "edited");
+    const exerciseDeletes = exerciseList.filter((exercise) => exercise.status === "deleted");
+    
+    const deleteExercisesCallback: transactionCallback = (results, tx) => {
+      if(exerciseDeletes.length > 0){
+        console.log("Deleting exercises");
+        return tx.executeSql(
+          exerciseDeletes.map((exercise) => `DELETE FROM ${tableNames.EXERCISES} WHERE id=?;`).join("\n"),
+          exerciseDeletes.map((exercise) => exercise.id),
+          (tx, results) => cb && cb(results, tx),
+          (tx, err) => logTxError.delete(err, tableNames.EXERCISES, exerciseDeletes)
+        );
+      }
+      return cb && cb(results, tx);
+    }
+
+    const updateExercisesCallback: transactionCallback = (results, tx) => {
+      if(exerciseUpdates.length > 0){
+        console.log("Updating exercises");
+        const fieldNames = ["name", "details"];
+        const exerciseValuesString = fieldNames.map((fieldName) => `${fieldName}=?`).join(", ");
+        return tx.executeSql(
+          exerciseUpdates.map((exercise) => `UPDATE ${tableNames.EXERCISES} SET ${exerciseValuesString} WHERE id=?;`).join("\n"),
+          flatten(exerciseUpdates.map((exercise) => [exercise.name, exercise.details, exercise.id])),
+          (tx, results) => deleteExercisesCallback(results, tx),
+          (tx, err) => logTxError.update(err, tableNames.EXERCISES, exerciseUpdates)
+        );
+      }
+      return deleteExercisesCallback(results, tx);
+    };
+
+    const createExercisesCallback: transactionCallback = (results, tx) => {
+      if(exerciseCreates.length > 0){
+        console.log("Creating exercises");
+        return tx.executeSql(
+          `INSERT INTO ${tableNames.EXERCISES} ${tableValues.EXERCISES} VALUES ${exerciseCreates.map(() => `(?, ?, ?)`).join(", ")};`,
+          flatten(exerciseCreates.map((exercise) => [exercise.name, exercise.details, training.id])),
+          (tx, results) => updateExercisesCallback(results, tx),
+          (tx, err) => logTxError.create(err, tableNames.EXERCISES, exerciseCreates)
+        );
+      }
+      return updateExercisesCallback(results, tx);
+    }
+
+    console.log("Updating training");
+    const trainingValues = [name, details];
+    const fieldNames = ["name", "details"];
+    const trainingValuesString = fieldNames.map((fieldName) => `${fieldName}=?`).join(", ");
+    return tx.executeSql(
+      `UPDATE ${tableNames.TRAINING} SET ${trainingValuesString} WHERE id=?;`,
+      [...trainingValues, id],
+      (tx, results) => createExercisesCallback(results, tx),
+      (tx, err) => logTxError.update(err, tableNames.TRAINING, training)
     )
   }),
   delete: (id: number, cb?: transactionCallback) => db.transaction((tx) => tx.executeSql(

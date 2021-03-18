@@ -13,4 +13,6 @@ export type Training = {
     details: string
 }
 
+export type ExerciseEdition = Exercise & {status: "created"|"edited"|"kept"|"deleted"}
+
 export type transactionCallback = (result: ResultSet, tx: Transaction) => void;

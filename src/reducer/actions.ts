@@ -1,6 +1,6 @@
 import { types } from "@babel/core";
 import { Action } from "redux";
-import { Exercise, Training } from "../constants/types";
+import { Exercise, ExerciseEdition, Training } from "../constants/types";
 
 export interface IAction {
   type: string,
@@ -27,7 +27,7 @@ export const actionTypes = Object.freeze({
   execution : Object.freeze({
     START_TRAINING: "START_TRAINING",
     SET_EXERCISE_EXECUTION_LIST: "SET_EXERCISE_EXECUTION_LIST",
-    MARK_EXERCISE_DONE: "MARK_EXERCISE_DONE",
+    TOGGLE_EXERCISE_DONE: "TOGGLE_EXERCISE_DONE",
     MARK_EXERCISE_NOT_DONE: "MARK_EXERCISE_NOT_DONE",
     FINISH_TRAINING: "FINISH_TRAINING"
   }),
@@ -60,7 +60,7 @@ export const actionBuilders = Object.freeze({
   execution: Object.freeze({
     START_TRAINING: actionFactory<{trainingId: number}>(actionTypes.execution.START_TRAINING),
     SET_EXERCISE_EXECUTION_LIST: actionFactory<{executionList: {exerciseId: number, done: boolean}[]}>(actionTypes.execution.SET_EXERCISE_EXECUTION_LIST),
-    MARK_EXERCISE_DONE: actionFactory<{exerciseId: number}>(actionTypes.execution.MARK_EXERCISE_DONE),
+    TOGGLE_EXERCISE_DONE: actionFactory<{exerciseId: number}>(actionTypes.execution.TOGGLE_EXERCISE_DONE),
     MARK_EXERCISE_NOT_DONE: actionFactory<{exerciseId: number}>(actionTypes.execution.MARK_EXERCISE_NOT_DONE),
     FINISH_TRAINING: emptyActionFactory(actionTypes.execution.FINISH_TRAINING)
   }),
@@ -74,7 +74,7 @@ export const actionBuilders = Object.freeze({
     FLUSH_FORM: emptyActionFactory(actionTypes.newTraining.FLUSH_FORM)
   }),
   editTraining: Object.freeze({
-    SET_EDITING_TRAINING: actionFactory<{trainingId: number}>(actionTypes.editTraining.SET_EDITING_TRAINING),
+    SET_EDITING_TRAINING: actionFactory<{training: Training, exerciseList: ExerciseEdition[]}>(actionTypes.editTraining.SET_EDITING_TRAINING),
     SET_TRAINING_NAME: actionFactory<{name: string}>(actionTypes.editTraining.SET_TRAINING_NAME),
     SET_TRAINING_DETAILS: actionFactory<{details: string}>(actionTypes.editTraining.SET_TRAINING_DETAILS),
     CREATE_EXERCISE: actionFactory<{trainingId: number}>(actionTypes.editTraining.CREATE_EXERCISE),

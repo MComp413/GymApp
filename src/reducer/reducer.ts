@@ -3,6 +3,7 @@ import { IEditState, IExecutionState, IGlobalState, INewState, initialState, ISt
 import { actionTypes, IAction } from './actions';
 import { clone } from 'ramda';
 import { NO_ID } from '../constants/constants';
+import { Exercise } from '../constants/types';
 
 function globalReducer(oldState: IGlobalState, action: IAction): IGlobalState {
   const newState = oldState ? {...oldState} : clone(initialState.global);
@@ -26,17 +27,10 @@ function executionReducer(oldState: IExecutionState, action: IAction): IExecutio
     case actionTypes.execution.SET_EXERCISE_EXECUTION_LIST:
       newState.executionExerciseList = action.payload.executionList;
       break;
-    case actionTypes.execution.MARK_EXERCISE_DONE:
+    case actionTypes.execution.TOGGLE_EXERCISE_DONE:
       newState.executionExerciseList = newState.executionExerciseList.map(
         (exercise) => exercise.exerciseId === action.payload.exerciseId ?
-          { exerciseId: exercise.exerciseId, done: true } :
-          exercise
-      );
-      break;
-    case actionTypes.execution.MARK_EXERCISE_NOT_DONE:
-      newState.executionExerciseList = newState.executionExerciseList.map(
-        (exercise) => exercise.exerciseId === action.payload.exerciseId ?
-          { exerciseId: exercise.exerciseId, done: false } :
+          { exerciseId: exercise.exerciseId, done: !exercise.done } :
           exercise
       );
       break;
@@ -86,6 +80,12 @@ function newReducer(oldState: INewState, action: IAction): INewState {
 function editReducer(oldState: IEditState, action: IAction): IEditState {
   const newState = oldState ? {...oldState} : clone(initialState.editTraining);
   switch(action.type){
+    case actionTypes.editTraining.SET_EDITING_TRAINING:
+      newState.editingTrainingId = action.payload.training.id;
+      newState.name = action.payload.training.name;
+      newState.details = action.payload.training.details;
+      newState.exercises = action.payload.exerciseList.map((exercise: Exercise) => {return {...exercise, status: "kept"}});
+      break;
     case actionTypes.editTraining.SET_TRAINING_NAME:
       newState.name = action.payload.name;
       break;
@@ -95,24 +95,40 @@ function editReducer(oldState: IEditState, action: IAction): IEditState {
     case actionTypes.editTraining.SET_EXERCISE_NAME:
       newState.exercises = newState.exercises.map(
         (exercise) => exercise.id! === action.payload.exerciseId ?
-          { ...exercise, name: action.payload.name } :
-          exercise
+          {
+            ...exercise,
+            name: action.payload.name,
+            status: exercise.status === "created" ? exercise.status : "edited"
+          }
+          : exercise
       );
       break;
     case actionTypes.editTraining.SET_EXERCISE_DETAILS:
       newState.exercises = newState.exercises.map(
         (exercise) => exercise.id! === action.payload.exerciseId ?
-          { ...exercise, details: action.payload.details } :
-          exercise
+          {
+            ...exercise,
+            details: action.payload.details,
+            status: exercise.status === "created" ? exercise.status : "edited"
+          }
+          : exercise
       );
       break;
     case actionTypes.editTraining.CREATE_EXERCISE:
-      const exerciseListLength = newState.exercises.length;
-      const maxTmpId = exerciseListLength > 0 ? newState.exercises[exerciseListLength-1].id! : 1;
-      newState.exercises = [...newState.exercises, {id: maxTmpId+1, name: "", details: "", trainingId: action.payload.trainingId}];
+      const maxId = newState.exercises.map((exercise) => exercise.id).reduce((acc, item) => acc > item ? acc : item);
+      newState.exercises = [...newState.exercises, {
+        id: maxId+1,
+        name: "",
+        details: "",
+        trainingId: action.payload.trainingId,
+        status: "created"
+      }];
       break;
     case actionTypes.editTraining.DELETE_EXERCISE:
-      newState.exercises = newState.exercises.filter((exercise) => exercise.id !== action.payload.exerciseTempId);
+      newState.exercises = newState.exercises.map((exercise) => exercise.id === action.payload.exerciseId ?
+        {...exercise, status: "deleted"}
+        : exercise
+      );
       break;
     case actionTypes.editTraining.FLUSH_FORM:
       return clone(initialState.editTraining);

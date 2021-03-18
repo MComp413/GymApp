@@ -16,29 +16,27 @@ const ExecuteTrainingScreen = ({route, navigation}: any) => {
   
   const {training, exerciseList} = useSelector((state: IState) => {
     return {
-      training: executionTrainingId !== null ? state.global.trainingList.find((training) => training.id === executionTrainingId) : null,
-      exerciseList: executionTrainingId !== null ? state.global.exerciseList.filter((exercise) => exercise.trainingId === executionTrainingId) : [] as Exercise[]
+      training: executionTrainingId !== null && state.global.trainingList !== null ?
+        state.global.trainingList.find((training) => training.id === executionTrainingId) ?? null
+        : null,
+      exerciseList: executionTrainingId !== null && state.global.exerciseList !== null ?
+        state.global.exerciseList.filter((exercise) => exercise.trainingId === executionTrainingId)
+        : [] as Exercise[]
     }
   });
 
   useEffect(() => {
-    if(executionTrainingId !== null && executionTrainingId !== undefined){
-      if(training === null){
-        dispatch(actionBuilders.execution.FINISH_TRAINING());
+    if(executionTrainingId !== null)
+      if(training !== null){
+        const executionList = exerciseList.map((exercise) => { return {exerciseId: exercise.id, done: false}});
+        executionList && dispatch(actionBuilders.execution.SET_EXERCISE_EXECUTION_LIST({executionList}));
       } else {
-        const executionList = exerciseList.map((exercise) => {
-          return {
-            exerciseId: exercise.id,
-            done: false
-          }
-        });
-        dispatch(actionBuilders.execution.SET_EXERCISE_EXECUTION_LIST({executionList}));
+        dispatch(actionBuilders.execution.FINISH_TRAINING());
       }
-    }
   },
   [executionTrainingId]);
 
-  if(executionTrainingId !== null && executionTrainingId !== undefined && training !== null && training !== undefined){
+  if(executionTrainingId !== null && training !== null){
     const {name, details} = training;
     return(
       <View>
@@ -48,20 +46,16 @@ const ExecuteTrainingScreen = ({route, navigation}: any) => {
           details={details}
         />
         <View>
-          {exerciseList!.map((exercise, index) => {
+          {exerciseList.map((exercise, index) => {
             const execution = executionExerciseList.find((execution) => execution.exerciseId === exercise.id);
-            const done = execution ? execution.done : false;
+            const done = execution?.done ?? false;
             return(
               <View key={index}>
                 <ExerciseExecutionCard
                   exercise={exercise}
                   checked={done}
                   onToggle={() => {
-                    if(done){
-                      dispatch(actionBuilders.execution.MARK_EXERCISE_NOT_DONE({exerciseId: exercise.id}));
-                    } else {
-                      dispatch(actionBuilders.execution.MARK_EXERCISE_DONE({exerciseId: exercise.id}));
-                    }
+                    dispatch(actionBuilders.execution.TOGGLE_EXERCISE_DONE({exerciseId: exercise.id}));
                   }}
                 />
               </View>
