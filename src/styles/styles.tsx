@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import Colors from '../constants/colors';
-import { paddingSizes } from '../constants/constants';
+import { spacingSizes } from '../constants/constants';
 import Fonts, { FontSizes } from '../constants/fonts';
 
 export const HeaderStyles = StyleSheet.create({
@@ -28,44 +28,48 @@ export const HeaderStyles = StyleSheet.create({
 
 export const InputStyles = StyleSheet.create({
   textInput: {
-    padding: 5,
-    backgroundColor: "white"
+    paddingVertical: spacingSizes.small,
+    backgroundColor: Colors.white
+  },
+  label: {
+    paddingVertical: spacingSizes.small,
+    fontSize: FontSizes.small
   }
 });
 
 export const PaddingStyles = {
   horizontal: StyleSheet.create({
     tiny: {
-      paddingHorizontal: paddingSizes.tiny,
+      paddingHorizontal: spacingSizes.tiny,
     },
     small: {
-      paddingHorizontal: paddingSizes.small
+      paddingHorizontal: spacingSizes.small
     },
     medium: {
-      paddingHorizontal: paddingSizes.medium
+      paddingHorizontal: spacingSizes.medium
     },
     large: {
-      paddingHorizontal: paddingSizes.large
+      paddingHorizontal: spacingSizes.large
     },
     extraLarge: {
-      paddingHorizontal: paddingSizes.extraLarge
+      paddingHorizontal: spacingSizes.extraLarge
     }
   }),
   vertical: StyleSheet.create({
     tiny: {
-      paddingVertical: paddingSizes.tiny,
+      paddingVertical: spacingSizes.tiny,
     },
     small: {
-      paddingVertical: paddingSizes.small
+      paddingVertical: spacingSizes.small
     },
     medium: {
-      paddingVertical: paddingSizes.medium
+      paddingVertical: spacingSizes.medium
     },
     large: {
-      paddingVertical: paddingSizes.large
+      paddingVertical: spacingSizes.large
     },
     extraLarge: {
-      paddingVertical: paddingSizes.extraLarge
+      paddingVertical: spacingSizes.extraLarge
     }
   })
 }

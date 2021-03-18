@@ -1,8 +1,10 @@
 import React from 'react';
-import { Button, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Exercise } from '../../constants/types';
-import { InputStyles } from '../../styles/styles';
+import { FlexStyles, InputStyles, PaddingStyles } from '../../styles/styles';
+import InputLabel from '../atom/InputLabel';
+import Button from '../atom/Button';
 
 const ExerciseListForm = (
   props: {
@@ -23,31 +25,40 @@ const ExerciseListForm = (
   return(
     <ScrollView>
       {exercises.map((exercise, index) => 
-        <View key={index}>
-          <Text> Nome do exercício </Text>
-          <TextInput
-            style={InputStyles.textInput}
-            onChangeText={onChangeNameCurry(exercise.id)}
-            value={exercise.name}
-          />
+        <View
+          style={{...PaddingStyles.vertical.small}}
+          key={index}
+        >
+          <View
+            style={{...PaddingStyles.vertical.small}}
+          >
+            <InputLabel text="Nome do exercício" />
+            <TextInput
+              style={InputStyles.textInput}
+              onChangeText={onChangeNameCurry(exercise.id)}
+              value={exercise.name}
+            />
 
-          <Text> Detalhes do exercício </Text>
-          <TextInput
-            style={InputStyles.textInput}
-            onChangeText={onChangeDetailCurry(exercise.id)}
-            value={exercise.details}
-          />
+            <InputLabel text="Detalhes do exercício" />
+            <TextInput
+              style={InputStyles.textInput}
+              onChangeText={onChangeDetailCurry(exercise.id)}
+              value={exercise.details}
+            />
+          </View>
 
           <Button
-            title="Deletar exercicio"
             onPress={onDeleteCurry(exercise.id)}
-          />
+          >
+            <Text> Deletar exercício </Text>
+          </Button>
         </View>
       )}
       <Button
-        title="Adicionar exercício"
         onPress={onAddExercise}
-      />
+      >
+        <Text> Adicionar exercício </Text>
+      </Button>
     </ScrollView>
   )
 }

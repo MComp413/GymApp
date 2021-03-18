@@ -5,7 +5,9 @@ import { NO_ID, StackNavRoutes } from '../../constants/constants';
 import { trainingCrud } from '../../database/transactions';
 import { actionBuilders } from '../../reducer/actions';
 import { IState } from '../../reducer/state';
+import { FlexStyles, InputStyles, PaddingStyles } from '../../styles/styles';
 import { updateGlobalExerciseList, updateGlobalTrainingList } from '../../utils/utils';
+import InputLabel from '../atom/InputLabel';
 import ExerciseListForm from '../org/ExerciseListForm';
 
 const style = StyleSheet.create({
@@ -20,16 +22,16 @@ const NewTrainingScreen = ({route, navigation}: any) => {
   const dispatch = useDispatch();
   return(
     <View
-      style={{flex: 1, flexDirection: 'column', justifyContent: "center", alignItems: "stretch"}}
+      style={{...FlexStyles.columnView, ...PaddingStyles.vertical.large, ...PaddingStyles.horizontal.large}}
     >
-      <Text> Nome do treino: </Text>
+      <InputLabel text="Nome do treino:" />
       <TextInput
         style={style.textInput}
         onChangeText={(text) => dispatch(actionBuilders.newTraining.SET_TRAINING_NAME({name: text}))}
         value={name}
       />
 
-      <Text> Detalhes do treino: </Text>
+      <InputLabel text="Detalhes do treino:" />
       <TextInput
         style={style.textInput}
         onChangeText={(text) => dispatch(actionBuilders.newTraining.SET_TRAINING_DETAILS({details: text}))}

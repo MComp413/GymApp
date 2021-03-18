@@ -37,7 +37,7 @@ export const tableValues = Object.freeze({
   EXERCISES: `(name, details, trainingId)`
 })
 
-export const paddingSizes = Object.freeze({
+export const spacingSizes = Object.freeze({
   tiny: 2,
   small: 5,
   medium: 10,
