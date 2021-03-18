@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Button, View, StyleSheet, FlatList} from 'react-native';
+import { Button, View, StyleSheet, FlatList, Text} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { StackNavRoutes, StackNavTitles } from '../../constants/constants';
 import TrainingCard from '../org/TrainingCard';
@@ -20,31 +20,35 @@ const TrainingListScreen = ({route, navigation}: any) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if(trainingList.length === 0)
+    if(trainingList === null)
       updateGlobalTrainingList(dispatch);
 
-    if(exerciseList.length === 0)
+    if(exerciseList === null)
       updateGlobalExerciseList(dispatch);
   },
   [trainingList, exerciseList]);
 
   return(
     <View style={styles.screen}>
-      <FlatList
-        data={trainingList}
-        renderItem={(info) => 
-          <View key={info.index}>
-            <TrainingCard
-              training={info.item}
-              navigation={navigation}
-            />
-          </View>
-        }
-      />
-      
+      {trainingList !== null && exerciseList !== null &&
+       trainingList.length > 0 && exerciseList.length > 0 ?
+        <FlatList
+          data={trainingList}
+          renderItem={(info) => 
+            <View key={info.index}>
+              <TrainingCard
+                training={info.item}
+                navigation={navigation}
+              />
+            </View>
+          }
+        />
+      :
+        <Text style={{textAlign: 'center'}}> Crie um treino para começar </Text>
+      }
       <Button
-          title={StackNavTitles[StackNavRoutes.NEW]}
-          onPress={() => navigation.navigate(StackNavRoutes.NEW)}
+        title={StackNavTitles[StackNavRoutes.NEW]}
+        onPress={() => navigation.navigate(StackNavRoutes.NEW)}
       />
     </View>
   );

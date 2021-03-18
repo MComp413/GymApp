@@ -6,7 +6,7 @@ import { flatten } from 'ramda';
 
 
 const db = openDatabase(
-  { name: "gymapp7.db", location: "default" },
+  { name: "gymapp8.db", location: "default" },
   () => {
     initTable();
   },
@@ -70,26 +70,33 @@ export const trainingCrud = Object.freeze({
   create: (data: Training, cb?: transactionCallback) => db.transaction((tx) => tx.executeSql(
     `INSERT INTO ${tableNames.TRAINING} ${tableValues.TRAINING} VALUES (?, ?);`,
     [data.name, data.details],
-    (tx, result) => cb && cb(result.rows, tx),
+    (tx, result) => cb && cb(result, tx),
     (tx, err) => logTxError.create(err, tableNames.TRAINING, data)
   )),
   createWithExercises: (training: Training, exerciseList: Exercise[], cb?: transactionCallback) => {
-    const writeExercisesCallback = (rows: ResultSetRowList, tx: Transaction) => {
-      const trainingRow: Training = rows.item(0);
-      const SQLStatement = `INSERT INTO ${tableNames.EXERCISES} ${tableValues.EXERCISES} VALUES ${exerciseList.map(() => `(?, ?, ?)`).join(", ")};`
-      const values = flatten(exerciseList.map((exercise) => [exercise.name, exercise.details, trainingRow.id]));
+    const writeExercisesCallback: transactionCallback = (result, tx) => {
+      const trainingId = result.insertId;
+      console.log(trainingId);
+      const SQLStatement = `INSERT INTO ${tableNames.EXERCISES} ${tableValues.EXERCISES} VALUES ${exerciseList.map(() => `(?, ?, ?)`).join(", ")};`;
+      const vals: (number | string)[] = [];
+      exerciseList.forEach((exercise) => {
+        vals.push(exercise.name, exercise.details, trainingId);
+      });
+      console.log(vals);
+      const values = flatten(exerciseList.map((exercise) => [exercise.name, exercise.details, trainingId]));
+      console.log(values);
       tx.executeSql(
         SQLStatement,
         values,
-        (tx, results) => cb && cb(results.rows, tx),
-        (tx, err) => logTxError.create(err, tableNames.EXERCISES, {byTrainingId: trainingRow.id})
+        (tx, results) => cb && cb(results, tx),
+        (tx, err) => logTxError.create(err, tableNames.EXERCISES, {byTrainingId: trainingId})
       );
     }
     
     return db.transaction((tx) => tx.executeSql(
       `INSERT INTO ${tableNames.TRAINING} ${tableValues.TRAINING} VALUES (?, ?);`,
       [training.name, training.details],
-      (tx, result) => writeExercisesCallback(result.rows, tx),
+      (tx, result) => writeExercisesCallback(result, tx),
       (tx, err) => logTxError.create(err, tableNames.TRAINING, training)
     ));
   },
@@ -97,13 +104,13 @@ export const trainingCrud = Object.freeze({
     all: (cb: transactionCallback) => db.transaction((tx) => tx.executeSql(
       `SELECT * FROM ${tableNames.TRAINING};`,
       [],
-      (tx, results) => cb(results.rows, tx),
+      (tx, results) => cb(results, tx),
       (tx, err) => logTxError.read(err, tableNames.TRAINING)
     )),
     byId: (id: number, cb: transactionCallback) => db.transaction((tx) => tx.executeSql(
       `SELECT * FROM ${tableNames.TRAINING} WHERE id=?;`,
       [id],
-      (tx, results) => cb(results.rows, tx),
+      (tx, results) => cb(results, tx),
       (tx, err) => logTxError.read(err, tableNames.TRAINING)
     ))
   }),
@@ -114,26 +121,23 @@ export const trainingCrud = Object.freeze({
     return tx.executeSql(
       `UPDATE ${tableNames.TRAINING} SET ${valuesString} WHERE id=?`,
       [...values, id],
-      (tx, results) => cb && cb(results.rows, tx),
+      (tx, results) => cb && cb(results, tx),
       (tx, err) => logTxError.update(err, tableNames.TRAINING, data)
     )
   }),
   delete: (id: number, cb?: transactionCallback) => db.transaction((tx) => tx.executeSql(
     `DELETE FROM ${tableNames.TRAINING} WHERE id=?`,
     [id],
-    (tx, results) => cb && cb(results.rows, tx),
+    (tx, results) => cb && cb(results, tx),
     (tx, err) => logTxError.delete(err, tableNames.TRAINING, id)
   )),
   deleteWithExercises: (id: number, cb?: transactionCallback) => {
-    const deleteExercisesCallback = (rows: ResultSetRowList, tx: Transaction) => {
-      const trainingRow: Training = rows.item(0);
-      tx.executeSql(
-        `DELETE FROM ${tableNames.EXERCISES} WHERE trainingId=?;`,
-        [trainingRow.id],
-        (tx, results) => cb && cb(results.rows, tx),
-        (tx, err) => logTxError.delete(err, tableNames.EXERCISES, {byTrainingId: trainingRow.id})
-      )
-    }
+    const deleteExercisesCallback: transactionCallback = (result, tx) => tx.executeSql(
+      `DELETE FROM ${tableNames.EXERCISES} WHERE trainingId=?;`,
+      [result.insertId],
+      (tx, results) => cb && cb(results, tx),
+      (tx, err) => logTxError.delete(err, tableNames.EXERCISES, {byTrainingId: result.insertId})
+    );
   
     return db.transaction((tx) => {
       tx.executeSql(
@@ -150,26 +154,26 @@ export const exerciseCrud = Object.freeze({
   create: (data: Exercise, cb?: transactionCallback) => db.transaction((tx) => tx.executeSql(
     `INSERT INTO ${tableNames.EXERCISES} ${tableValues.EXERCISES} VALUES (?, ?, ?);`,
     [data.name, data.details, data.trainingId],
-    (tx, result) => cb && cb(result.rows, tx),
+    (tx, result) => cb && cb(result, tx),
     (tx, err) => logTxError.create(err, tableNames.EXERCISES, data)
   )),
   read: Object.freeze({
     all: (cb: transactionCallback) => db.transaction((tx) => tx.executeSql(
       `SELECT * FROM ${tableNames.EXERCISES};`,
       [],
-      (tx, results) => cb(results.rows, tx),
+      (tx, results) => cb(results, tx),
       (tx, err) => logTxError.read(err, tableNames.EXERCISES)
     )),
     byId: (id: number, cb: transactionCallback) => db.transaction((tx) => tx.executeSql(
       `SELECT * FROM ${tableNames.EXERCISES} WHERE id=?;`,
       [id],
-      (tx, results) => cb(results.rows, tx),
+      (tx, results) => cb(results, tx),
       (tx, err) => logTxError.read(err, tableNames.EXERCISES)
     )),
     byTrainingId: (id: number, cb: transactionCallback) => db.transaction((tx) => tx.executeSql(
       `SELECT * FROM ${tableNames.EXERCISES} WHERE trainingId=?;`,
       [id],
-      (tx, results) => cb(results.rows, tx),
+      (tx, results) => cb(results, tx),
       (tx, err) => logTxError.read(err, tableNames.EXERCISES)
     ))
   }),
@@ -180,7 +184,7 @@ export const exerciseCrud = Object.freeze({
     return tx.executeSql(
       `UPDATE ${tableNames.EXERCISES} SET ${valuesString} WHERE id=?`,
       [...values, id],
-      (tx, results) => cb && cb(results.rows, tx),
+      (tx, results) => cb && cb(results, tx),
       (tx, err) => logTxError.update(err, tableNames.EXERCISES, data)
     )
   }),
@@ -188,13 +192,13 @@ export const exerciseCrud = Object.freeze({
     byId: (id: number, cb?: transactionCallback) => db.transaction((tx) => tx.executeSql(
       `DELETE FROM ${tableNames.EXERCISES} WHERE id=?`,
       [id],
-      (tx, results) => cb && cb(results.rows, tx),
+      (tx, results) => cb && cb(results, tx),
       (tx, err) => logTxError.delete(err, tableNames.EXERCISES, {byId: id})
     )),
     byTrainingId: (trainingId: number, cb?: transactionCallback) => db.transaction((tx) => tx.executeSql(
       `DELETE FROM ${tableNames.EXERCISES} WHERE trainingId=?`,
       [trainingId],
-      (tx, results) => cb && cb(results.rows, tx),
+      (tx, results) => cb && cb(results, tx),
       (tx, err) => logTxError.delete(err, tableNames.EXERCISES, {byTrainingId: trainingId})
     ))
   })

@@ -66,11 +66,13 @@ const NewTrainingScreen = ({route, navigation}: any) => {
       <Button
         title="Create"
         onPress={() => {
-          trainingCrud.createWithExercises({id: NO_ID, name, details}, exercises);
-          updateGlobalTrainingList(dispatch);
-          updateGlobalExerciseList(dispatch);
-          dispatch(actionBuilders.newTraining.FLUSH_FORM());
-          navigation.navigate(StackNavRoutes.HOME);
+          trainingCrud.createWithExercises({id: NO_ID, name, details}, exercises, (rows, tx) => {
+            console.log("Executing callback");
+            updateGlobalTrainingList(dispatch);
+            updateGlobalExerciseList(dispatch);
+            dispatch(actionBuilders.newTraining.FLUSH_FORM());
+            navigation.navigate(StackNavRoutes.HOME);
+          });
         }}
       />
     </View>

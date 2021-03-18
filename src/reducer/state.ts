@@ -1,8 +1,8 @@
 import { Exercise, Training } from "../constants/types";
 
 export interface IGlobalState {
-  trainingList: Training[],
-  exerciseList: Exercise[]
+  trainingList: Training[] | null,
+  exerciseList: Exercise[] | null
 }
 
 export interface IExecutionState {
@@ -32,8 +32,8 @@ export interface IState {
 
 export const initialState: IState = Object.freeze({
   global: Object.freeze({
-    trainingList: [],
-    exerciseList: []
+    trainingList: null,
+    exerciseList: null
   }),
   execution: Object.freeze({
     executionTrainingId: null,

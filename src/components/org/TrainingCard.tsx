@@ -8,12 +8,13 @@ import { actionBuilders } from '../../reducer/actions';
 import { IState } from '../../reducer/state';
 import { trainingCrud } from '../../database/transactions';
 import { updateGlobalExerciseList, updateGlobalTrainingList } from '../../utils/utils';
+import TrainingHeader from '../atom/TrainingHeader';
 
 
 const TrainingCard = (props: {training: Training, navigation: any}) => {
   const {training, navigation} = props;
   const {id, name, details} = training;
-  const exerciseList = useSelector((state: IState) => state.global.exerciseList.filter((exercise) => exercise.trainingId === id));
+  const exerciseList = useSelector((state: IState) => state.global.exerciseList && state.global.exerciseList.filter((exercise) => exercise.trainingId === id));
   const dispatch = useDispatch();
   
   return(
@@ -22,7 +23,7 @@ const TrainingCard = (props: {training: Training, navigation: any}) => {
         id={id}
         name={name}
         details={details}
-        exerciseList={exerciseList}
+        exerciseList={exerciseList ? exerciseList : []}
       />
       <View>
         <Button
@@ -32,7 +33,7 @@ const TrainingCard = (props: {training: Training, navigation: any}) => {
         <Button
           title="deletar treino"
           onPress={() => {
-            console.log(`deletando ${id} - ${name}`)
+            console.log(`deletando ${id} - ${name}`);
             trainingCrud.deleteWithExercises(id);
             updateGlobalTrainingList(dispatch);
             updateGlobalExerciseList(dispatch);

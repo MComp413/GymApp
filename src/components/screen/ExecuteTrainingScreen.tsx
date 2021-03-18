@@ -38,8 +38,8 @@ const ExecuteTrainingScreen = ({route, navigation}: any) => {
   },
   [executionTrainingId]);
 
-  if(executionTrainingId !== null && executionTrainingId !== undefined){
-    const {name, details} = training!;
+  if(executionTrainingId !== null && executionTrainingId !== undefined && training !== null && training !== undefined){
+    const {name, details} = training;
     return(
       <View>
         <TrainingHeader
