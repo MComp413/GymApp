@@ -22,7 +22,9 @@ const EditTrainingScreen = ({route, navigation}: any) => {
   const dispatch = useDispatch();
   
   return(
-    <View>
+    <View
+      style={{flex: 1, flexDirection: 'column', justifyContent: "center", alignItems: "stretch"}}
+    >
       {editingTrainingId !== null ? 
         <>
           <Text> Nome do treino: </Text>
@@ -44,11 +46,7 @@ const EditTrainingScreen = ({route, navigation}: any) => {
             onChangeNameCurry={(exerciseId) => (text) => dispatch(actionBuilders.editTraining.SET_EXERCISE_NAME({exerciseId, name: text}))}
             onChangeDetailCurry={(exerciseId) => (text) => dispatch(actionBuilders.editTraining.SET_EXERCISE_DETAILS({exerciseId, details: text}))}
             onDeleteCurry={(exerciseId) => () => dispatch(actionBuilders.editTraining.DELETE_EXERCISE({exerciseId}))}
-          />
-
-          <Button
-            title="Adicionar exercício"
-            onPress={() => dispatch(actionBuilders.editTraining.CREATE_EXERCISE({trainingId: editingTrainingId}))}
+            onAddExercise={() => dispatch(actionBuilders.editTraining.CREATE_EXERCISE({trainingId: editingTrainingId}))}
           />
 
           <Button

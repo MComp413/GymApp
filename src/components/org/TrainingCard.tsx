@@ -8,6 +8,8 @@ import { actionBuilders } from '../../reducer/actions';
 import { IState } from '../../reducer/state';
 import { trainingCrud } from '../../database/transactions';
 import { updateGlobalExerciseList, updateGlobalTrainingList } from '../../utils/utils';
+import { FlexStyles, PaddingStyles } from '../../styles/styles';
+import Colors from '../../constants/colors';
 
 
 const TrainingCard = (props: {training: Training, navigation: any}) => {
@@ -20,34 +22,38 @@ const TrainingCard = (props: {training: Training, navigation: any}) => {
   const dispatch = useDispatch();
   
   return(
-    <View>
-      
-      <TrainingData
-        id={id}
-        name={name}
-        details={details}
-        exerciseList={exerciseList}
-      />
-
-      <View>
-        <Button
-          title={StackNavTitles[StackNavRoutes.EDIT]}
-          onPress={() => {
-            dispatch(actionBuilders.editTraining.SET_EDITING_TRAINING({training, exerciseList: exerciseList}))
-            navigation.push(StackNavRoutes.EDIT)
-          }}
+    <View
+      style={FlexStyles.columnView}
+    >
+      <View
+        style={{...FlexStyles.rowView, ...PaddingStyles.vertical.small}}
+      >
+        <TrainingData
+          id={id}
+          name={name}
+          details={details}
+          exerciseList={exerciseList}
         />
-        <Button
-          title="deletar treino"
-          onPress={() => {
-            console.log(`deletando ${id} - ${name}`);
-            trainingCrud.deleteWithExercises(id);
-            updateGlobalTrainingList(dispatch);
-            updateGlobalExerciseList(dispatch);
-          }}
-        />
+        <View>
+          <Button
+            title={StackNavTitles[StackNavRoutes.EDIT]}
+            onPress={() => {
+              dispatch(actionBuilders.editTraining.SET_EDITING_TRAINING({training, exerciseList: exerciseList}))
+              navigation.push(StackNavRoutes.EDIT)
+            }}
+          />
+          <Button
+            color={Colors.primary}
+            title="deletar treino"
+            onPress={() => {
+              console.log(`deletando ${id} - ${name}`);
+              trainingCrud.deleteWithExercises(id);
+              updateGlobalTrainingList(dispatch);
+              updateGlobalExerciseList(dispatch);
+            }}
+          />
+        </View>
       </View>
-
       <Button
         title={TabNavTitles[TabNavRoutes.EXECUTE]}
         onPress={() => {
@@ -55,7 +61,6 @@ const TrainingCard = (props: {training: Training, navigation: any}) => {
           navigation.navigate(TabNavRoutes.EXECUTE, {trainingId: id});
         }}
       />
-
     </View>
   )
 }

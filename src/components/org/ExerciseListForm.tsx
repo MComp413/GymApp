@@ -1,44 +1,39 @@
 import React from 'react';
-import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useDispatch } from 'react-redux';
+import { Button, Text, TextInput, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { Exercise } from '../../constants/types';
-import { actionBuilders } from '../../reducer/actions';
-
-const style = StyleSheet.create({
-  textInput: {
-    padding: 5,
-    backgroundColor: "white"
-  }
-})
+import { InputStyles } from '../../styles/styles';
 
 const ExerciseListForm = (
   props: {
     exercises: Exercise[],
     onChangeNameCurry: (exerciseId: number) => (text: string) => void,
     onChangeDetailCurry: (exerciseId: number) => (text: string) => void
-    onDeleteCurry: (exerciseId: number) => () => void
+    onDeleteCurry: (exerciseId: number) => () => void,
+    onAddExercise: () => void
   }
 ) => {
   const {
     exercises,
     onChangeDetailCurry,
     onChangeNameCurry,
-    onDeleteCurry
+    onDeleteCurry,
+    onAddExercise
   } = props;
   return(
-    <View>
+    <ScrollView>
       {exercises.map((exercise, index) => 
         <View key={index}>
           <Text> Nome do exercício </Text>
           <TextInput
-            style={style.textInput}
+            style={InputStyles.textInput}
             onChangeText={onChangeNameCurry(exercise.id)}
             value={exercise.name}
           />
 
           <Text> Detalhes do exercício </Text>
           <TextInput
-            style={style.textInput}
+            style={InputStyles.textInput}
             onChangeText={onChangeDetailCurry(exercise.id)}
             value={exercise.details}
           />
@@ -49,7 +44,11 @@ const ExerciseListForm = (
           />
         </View>
       )}
-    </View>
+      <Button
+        title="Adicionar exercício"
+        onPress={onAddExercise}
+      />
+    </ScrollView>
   )
 }
 

@@ -19,7 +19,9 @@ const NewTrainingScreen = ({route, navigation}: any) => {
   const {name, details, exercises} = useSelector((state: IState) => state.newTraining);
   const dispatch = useDispatch();
   return(
-    <View>
+    <View
+      style={{flex: 1, flexDirection: 'column', justifyContent: "center", alignItems: "stretch"}}
+    >
       <Text> Nome do treino: </Text>
       <TextInput
         style={style.textInput}
@@ -39,11 +41,7 @@ const NewTrainingScreen = ({route, navigation}: any) => {
         onChangeNameCurry={(exerciseId) => (text) => dispatch(actionBuilders.newTraining.SET_EXERCISE_NAME({exerciseTempId: exerciseId, name: text}))}
         onChangeDetailCurry={(exerciseId) => (text) => dispatch(actionBuilders.newTraining.SET_EXERCISE_DETAILS({exerciseTempId: exerciseId, details: text}))}
         onDeleteCurry={(exerciseId) => () => dispatch(actionBuilders.newTraining.DELETE_EXERCISE({exerciseTempId: exerciseId}))}
-      />
-      
-      <Button
-        title="Adicionar exercício"
-        onPress={() => dispatch(actionBuilders.newTraining.CREATE_EXERCISE())}
+        onAddExercise={() => dispatch(actionBuilders.newTraining.CREATE_EXERCISE())}
       />
 
       <Button

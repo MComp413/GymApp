@@ -74,7 +74,7 @@ export const actionBuilders = Object.freeze({
     FLUSH_FORM: emptyActionFactory(actionTypes.newTraining.FLUSH_FORM)
   }),
   editTraining: Object.freeze({
-    SET_EDITING_TRAINING: actionFactory<{training: Training, exerciseList: ExerciseEdition[]}>(actionTypes.editTraining.SET_EDITING_TRAINING),
+    SET_EDITING_TRAINING: actionFactory<{training: Training, exerciseList: Exercise[]}>(actionTypes.editTraining.SET_EDITING_TRAINING),
     SET_TRAINING_NAME: actionFactory<{name: string}>(actionTypes.editTraining.SET_TRAINING_NAME),
     SET_TRAINING_DETAILS: actionFactory<{details: string}>(actionTypes.editTraining.SET_TRAINING_DETAILS),
     CREATE_EXERCISE: actionFactory<{trainingId: number}>(actionTypes.editTraining.CREATE_EXERCISE),

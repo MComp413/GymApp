@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Button, View, Text } from "react-native";
+import { Button, View, Text, ListRenderItemInfo } from "react-native";
+import { FlatList } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 import { Exercise } from '../../constants/types';
 import { actionBuilders } from '../../reducer/actions';
 import { IState } from '../../reducer/state';
+import { FlexStyles, PaddingStyles } from '../../styles/styles';
 import TrainingHeader from '../atom/TrainingHeader';
 import { ExecutionFooter } from '../org/ExecutionFooter';
 import ExerciseExecutionCard from '../org/ExerciseExecutionCard';
@@ -39,29 +41,34 @@ const ExecuteTrainingScreen = ({route, navigation}: any) => {
   if(executionTrainingId !== null && training !== null){
     const {name, details} = training;
     return(
-      <View>
-        <TrainingHeader
-          id={executionTrainingId}
-          name={name}
-          details={details}
-        />
-        <View>
-          {exerciseList.map((exercise, index) => {
-            const execution = executionExerciseList.find((execution) => execution.exerciseId === exercise.id);
-            const done = execution?.done ?? false;
-            return(
-              <View key={index}>
-                <ExerciseExecutionCard
-                  exercise={exercise}
-                  checked={done}
-                  onToggle={() => {
-                    dispatch(actionBuilders.execution.TOGGLE_EXERCISE_DONE({exerciseId: exercise.id}));
-                  }}
-                />
-              </View>
-            );
-          })}
-        </View>
+      <View
+        style={{...FlexStyles.columnView, ...PaddingStyles.horizontal.large, ...PaddingStyles.vertical.large}}
+      >
+          <TrainingHeader
+            id={executionTrainingId}
+            name={name}
+            details={details}
+            expanded={true}
+          />
+          <FlatList
+            data={exerciseList}
+            renderItem={({item: exercise, index}: ListRenderItemInfo<Exercise>) => {
+              const execution = executionExerciseList.find((execution) => execution.exerciseId === exercise.id);
+              const done = execution?.done ?? false;
+              return(
+                <View key={index}>
+                  <ExerciseExecutionCard
+                    exercise={exercise}
+                    checked={done}
+                    onToggle={() => {
+                      dispatch(actionBuilders.execution.TOGGLE_EXERCISE_DONE({exerciseId: exercise.id}));
+                    }}
+                  />
+                </View>
+              );
+            }}
+          />
+       
         <ExecutionFooter
           navigation={navigation}
         />

@@ -74,22 +74,17 @@ export const trainingCrud = Object.freeze({
     (tx, err) => logTxError.create(err, tableNames.TRAINING, data)
   )),
   createWithExercises: (training: Training, exerciseList: Exercise[], cb?: transactionCallback) => {
-    const writeExercisesCallback: transactionCallback = (result, tx) => {
-      const trainingId = result.insertId;
-      const SQLStatement = `INSERT INTO ${tableNames.EXERCISES} ${tableValues.EXERCISES} VALUES ${exerciseList.map(() => `(?, ?, ?)`).join(", ")};`;
-      const vals: (number | string)[] = [];
-      exerciseList.forEach((exercise) => {
-        vals.push(exercise.name, exercise.details, trainingId);
-      });
-      console.log(vals);
-      const values = flatten(exerciseList.map((exercise) => [exercise.name, exercise.details, trainingId]));
-      console.log(values);
-      tx.executeSql(
-        SQLStatement,
-        values,
-        (tx, results) => cb && cb(results, tx),
-        (tx, err) => logTxError.create(err, tableNames.EXERCISES, {byTrainingId: trainingId})
-      );
+    const writeExercisesCallback: transactionCallback = (results, tx) => {
+      if(exerciseList.length > 0){
+        const trainingId = results.insertId;
+        return tx.executeSql(
+          `INSERT INTO ${tableNames.EXERCISES} ${tableValues.EXERCISES} VALUES ${exerciseList.map(() => `(?, ?, ?)`).join(", ")};`,
+          flatten(exerciseList.map((exercise) => [exercise.name, exercise.details, trainingId])),
+          (tx, results) => cb && cb(results, tx),
+          (tx, err) => logTxError.create(err, tableNames.EXERCISES, {byTrainingId: trainingId})
+        );
+      }
+      return cb && cb(results, tx);
     }
     
     return db.transaction((tx) => tx.executeSql(

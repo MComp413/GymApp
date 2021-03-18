@@ -125,7 +125,9 @@ function editReducer(oldState: IEditState, action: IAction): IEditState {
       }];
       break;
     case actionTypes.editTraining.DELETE_EXERCISE:
-      newState.exercises = newState.exercises.map((exercise) => exercise.id === action.payload.exerciseId ?
+      newState.exercises = newState.exercises
+      .filter((exercise) => !(exercise.id === action.payload.exerciseId && exercise.status === "created"))
+      .map((exercise) => exercise.id === action.payload.exerciseId ?
         {...exercise, status: "deleted"}
         : exercise
       );
